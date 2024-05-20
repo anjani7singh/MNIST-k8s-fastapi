@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ns-mnist-api
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: mnist-api
+  name: mnist-api
+  namespace: ns-mnist-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mnist-api
+  template:
+    metadata:
+      labels:
+        app: mnist-api
+    spec:
+      containers:
+        - image: anjani7singh/mnist-api:latest
+          name: mnist-api
+          ports:
+            - containerPort: 8000
+                    livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mnist-api-lb
+  labels:
+    app: mnist-api
+  namespace: ns-mnist-api
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8000
+      targetPort: 8000
+  selector:
+    app: mnist-api
